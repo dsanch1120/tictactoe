@@ -15,6 +15,7 @@ public class Board {
 	private BoardCell[][] board;
 	private int currentPlayer = 0;
 	private static Board theInstance = new Board();
+	private int currentTurn = 0;
 
 	//Methods to be utilized throughout program
 
@@ -27,16 +28,24 @@ public class Board {
 	//Plays the game
 	private void playGame() {
 		while (!checkVictory()) {
-		displayBoard();
-		System.out.println("Player " + (theInstance.currentPlayer + 1) + "'s Turn!");
-		updateBoard(this.players.get(currentPlayer).move());
-		if (currentPlayer == 1) {
-			currentPlayer = 0;
-		} else {
-			currentPlayer++;
-		}
+			currentTurn++;
+			if (currentTurn == 10) {
+				catsGame();
+				return;
+			}
+			displayBoard();
+			System.out.println("Player " + (theInstance.currentPlayer + 1) + "'s Turn!");
+			updateBoard(this.players.get(currentPlayer).move());
+			if (currentPlayer == 1) {
+				currentPlayer = 0;
+			} else {
+				currentPlayer++;
+			}
 		}
 		endGame();
+	}
+	public int getCurrentTurn() {
+		return currentTurn;
 	}
 	//Updates the board
 	private void updateBoard(int value) {
@@ -51,12 +60,22 @@ public class Board {
 		}
 	}
 	
+	//Handles a cat's game
+	private void catsGame() {
+		displayBoard();
+		System.out.println("Cat's Game!!");
+	}
+
 	//Handles a victory
 	private void endGame() {
 		displayBoard();
-		System.out.println("The end of the Game");
+		if (currentPlayer == 0) {
+			System.out.println("Player 2 Wins!");
+		} else {
+			System.out.println("Player 1 Wins!");
+		}
 	}
-	
+
 	//Checks if a player won the game
 	private boolean checkVictory() {	
 		for (int i = 0; i < board.length; i++) {
@@ -89,12 +108,12 @@ public class Board {
 		}
 		return false;
 	}
-	
+
 	//Displays Board
 	private void displayBoard() {
 		//Clears terminal
 		clearTerminal();
-		
+
 		//Displays the Board
 		for (int i = 0; i < board.length; i++) {
 			for (int j = 0; j < board[i].length; j++) {
@@ -106,7 +125,7 @@ public class Board {
 			System.out.println();
 		}
 	}
-	
+
 	//Creates Board
 	private void createBoard() {
 		theInstance.board = new BoardCell[3][3];
@@ -153,12 +172,36 @@ public class Board {
 			theInstance.players.add(new HumanPlayer(2));
 			break;
 		case 2:
+			System.out.println("Choose Difficulty");
+			System.out.println("1 for Easy");
+			System.out.println("2 for Difficult");
+			int input;
+			while (true) {
+				Scanner in = new Scanner(System.in);
+				String s = in.nextLine();
+
+				try {
+					uInput = Integer.parseInt(s);
+				} catch (NumberFormatException e) {
+					System.out.println("Invalid Input");
+					continue;
+				}
+				if (uInput < 1 || uInput > 2) {
+					System.out.println("Invalid Input");
+					continue;
+				} else {
+					input = uInput;
+					break;
+				}
+			}
+
 			theInstance.players.add(new HumanPlayer(1));
-			theInstance.players.add(new ComputerPlayer(2));
+			theInstance.players.add(new ComputerPlayer(2, input));
 			break;
 		case 3:
-			theInstance.players.add(new ComputerPlayer(1));
-			theInstance.players.add(new ComputerPlayer(2));
+			theInstance.players.add(new ComputerPlayer(1, 2));
+			theInstance.players.add(new ComputerPlayer(2, 2));
+			break;
 		default:
 			break;
 		}
@@ -168,18 +211,18 @@ public class Board {
 
 	//Clears terminal
 	private void clearTerminal() {
-		System.out.print("\083[H\033[2J");
+		System.out.print("\033[H\033[2J");
 		System.out.flush();
-		System.out.println();
 	}
-	
+
 	public static void main(String[] args) {
 		Board board = Board.getTheInstance();
+		board.clearTerminal();
 		board.initialize();
 	}
-	
+
 	public static Board getTheInstance() {
 		return theInstance;
 	}
-	
+
 }
